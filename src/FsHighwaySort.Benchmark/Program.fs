@@ -15,6 +15,11 @@ let main _ =
         valuesWarmup[i] <- uint32 i
         valuesMeasured[i] <- uint32 i
 
+    printfn "UseLocalNativeRuntime = %s"
+        (match Environment.GetEnvironmentVariable("UseLocalNativeRuntime") with
+         | null -> "(MSBuild property only)"
+         | v -> v)    
+    
     printfn $"SIMD pack/unpack: {HighwayNative.SimdBackend}"
     printfn "Disable with: HIGHWAYBENCHMARK_SIMD_DISABLE=true"
 

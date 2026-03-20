@@ -12,5 +12,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>preview</LangVersion>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <UseLocalNativeRuntime Condition="'$(UseLocalNativeRuntime)' == ''">true</UseLocalNativeRuntime>
+    <FsHighwaySortVersion Condition="'$(FsHighwaySortVersion)' == ''">0.1.0</FsHighwaySortVersion>
   </PropertyGroup>
 </Project>

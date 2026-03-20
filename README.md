@@ -61,7 +61,7 @@ For command-line builds on Windows, use **Developer Command Prompt for Visual St
 From the repository root:
 
 ```bash
-cmake -S src/FsHighwaySort.Native -B artifacts/native/linux-x64 -DCMAKE_BUILD_TYPE=Release
+cmake -S src/FsHighwaySort.Native -B artifacts/native/linux-x64 -DCMAKE_BUILD_TYPE=Release -DHIGHWAY_SORT_FETCH_HIGHWAY=OFF
 cmake --build artifacts/native/linux-x64 --config Release
 cmake --install artifacts/native/linux-x64 --config Release --prefix artifacts/stage/linux-x64
 dotnet build src/FsHighwaySort.Interop/FsHighwaySort.Interop.fsproj -c Release

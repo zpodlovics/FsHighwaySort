@@ -5,8 +5,8 @@
     <LangVersion>preview</LangVersion>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <IsPackable>true</IsPackable>
-    <PackageId>FsFsHighwaySort.Interop</PackageId>
-    <Version>0.1.0</Version>
+    <PackageId>FsHighwaySort.Interop</PackageId>
+    <Version>$(FsHighwaySortVersion)</Version>
     <Description>Managed .NET interop library for the Highway sort wrapper (F#).</Description>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
@@ -14,19 +14,4 @@
   <ItemGroup>
     <Compile Include="HighwayNative.fs" />
   </ItemGroup>
-
-  <Choose>
-    <When Condition="Exists('..\FsHighwaySort.Native.Runtime\FsHighwaySort.Native.Runtime.csproj')">
-      <ItemGroup>
-        <ProjectReference Include="..\FsHighwaySort.Native.Runtime\FsHighwaySort.Native.Runtime.csproj"
-                          ReferenceOutputAssembly="false"
-                          PrivateAssets="all" />
-      </ItemGroup>
-    </When>
-    <Otherwise>
-      <ItemGroup>
-        <PackageReference Include="FsHighwaySort.Native.Runtime" Version="0.1.0" />
-      </ItemGroup>
-    </Otherwise>
-  </Choose>
 </Project>
