@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IsPackable>true</IsPackable>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <PackageId>HighwaySort.Native.Runtime</PackageId>
+    <Version>0.1.0</Version>
+    <Description>Native runtime assets for the Highway sort wrapper.</Description>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <NuspecFile></NuspecFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="../../artifacts/nuget/native/runtimes/**/*.*">
+      <Pack>true</Pack>
+      <PackagePath>runtimes/%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+      <Visible>false</Visible>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <Target Name="ValidateNativeAssets" BeforeTargets="Pack">
+    <Error Condition="!Exists('$(MSBuildProjectDirectory)/../../artifacts/nuget/native/runtimes')"
+           Text="Native runtime assets were not staged. Run the native staging step before packing." />
+    <ItemGroup>
+      <_StagedNative Include="../../artifacts/nuget/native/runtimes/**/*.*" />
+    </ItemGroup>
+    <Error Condition="'@(_StagedNative)' == ''"
+           Text="No native runtime assets found under artifacts/nuget/native/runtimes. The package would be empty." />
+  </Target>
+</Project>

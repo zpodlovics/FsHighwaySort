@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>preview</LangVersion>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <IsPackable>true</IsPackable>
+    <PackageId>HighwaySort.Interop</PackageId>
+    <Version>0.1.0</Version>
+    <Description>Managed .NET interop library for the Highway sort wrapper (F#).</Description>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="HighwayNative.fs" />
+  </ItemGroup>
+
+  <Choose>
+    <When Condition="Exists('..\HighwaySort.Native.Runtime\HighwaySort.Native.Runtime.csproj')">
+      <ItemGroup>
+        <ProjectReference Include="..\HighwaySort.Native.Runtime\HighwaySort.Native.Runtime.csproj"
+                          ReferenceOutputAssembly="false"
+                          PrivateAssets="all" />
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <PackageReference Include="HighwaySort.Native.Runtime" Version="0.1.0" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+</Project>
