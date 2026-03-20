@@ -4,7 +4,7 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <IsPackable>true</IsPackable>
     <NoWarn>$(NoWarn);NU5128</NoWarn>
-    <PackageId>HighwaySort.Native.Runtime</PackageId>
+    <PackageId>FsFsFsHighwaySort.Native.Runtime</PackageId>
     <Version>0.1.0</Version>
     <Description>Native runtime assets for the Highway sort wrapper.</Description>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>

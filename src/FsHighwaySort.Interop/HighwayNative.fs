@@ -1,4 +1,4 @@
-namespace HighwaySort.Interop
+namespace FsFsHighwaySort.Interop
 
 open System
 open System.Runtime.CompilerServices
@@ -16,7 +16,7 @@ type HighwayUint128 =
     val mutable Hi: uint64
     new(lo, hi) = { Lo = lo; Hi = hi }
 
-type HighwaySortStatus =
+type FsHighwaySortStatus =
     | Ok = 0
     | NullPointer = 1
     | InvalidLength = 2
@@ -25,7 +25,7 @@ type HighwaySortStatus =
 
 type HighwayUint128Ptr = nativeptr<HighwayUint128>
 
-exception HighwaySortException of message: string * status: HighwaySortStatus
+exception FsHighwaySortException of message: string * status: FsHighwaySortStatus
 
 module private NativeMethods =
     [<Literal>]
@@ -73,27 +73,27 @@ type HighwayNative private () =
         if p = 0n then "Unknown native error."
         else Marshal.PtrToStringUTF8(p) |> Option.ofObj |> Option.defaultValue "Unknown native error."
 
-    static member private ThrowIfFailed(status: HighwaySortStatus, error: string option) =
-        if status <> HighwaySortStatus.Ok then
+    static member private ThrowIfFailed(status: FsHighwaySortStatus, error: string option) =
+        if status <> FsHighwaySortStatus.Ok then
             let message = defaultArg error ($"Native sort failed with status {int status}.")
-            raise (HighwaySortException(message, status))
+            raise (FsHighwaySortException(message, status))
 
     static member TrySortPackedAscending(data: HighwayUint128Ptr, length: int, error: byref<string>) =
         if length < 0 then
             error <- "Length must be non-negative."
-            HighwaySortStatus.InvalidLength
+            FsHighwaySortStatus.InvalidLength
         else
-            let status = enum<HighwaySortStatus>(NativeMethods.sort_u128_asc(data, unativeint length))
-            error <- if status = HighwaySortStatus.Ok then null else HighwayNative.GetLastErrorMessage()
+            let status = enum<FsHighwaySortStatus>(NativeMethods.sort_u128_asc(data, unativeint length))
+            error <- if status = FsHighwaySortStatus.Ok then null else HighwayNative.GetLastErrorMessage()
             status
 
     static member TrySortPackedDescending(data: HighwayUint128Ptr, length: int, error: byref<string>) =
         if length < 0 then
             error <- "Length must be non-negative."
-            HighwaySortStatus.InvalidLength
+            FsHighwaySortStatus.InvalidLength
         else
-            let status = enum<HighwaySortStatus>(NativeMethods.sort_u128_desc(data, unativeint length))
-            error <- if status = HighwaySortStatus.Ok then null else HighwayNative.GetLastErrorMessage()
+            let status = enum<FsHighwaySortStatus>(NativeMethods.sort_u128_desc(data, unativeint length))
+            error <- if status = FsHighwaySortStatus.Ok then null else HighwayNative.GetLastErrorMessage()
             status
 
     static member SortPackedAscending(data: HighwayUint128Ptr, length: int) =
@@ -143,19 +143,19 @@ type HighwayNative private () =
     static member TrySortKeysValuesAscending(keys: ReadOnlySpan<double>, values: Span<uint32>, error: byref<string>) =
         if keys.Length <> values.Length then
             error <- "Keys and values must have the same length."
-            HighwaySortStatus.InvalidLength
+            FsHighwaySortStatus.InvalidLength
         else
             let length = keys.Length
             let totalBytes = unativeint (length * sizeof<HighwayUint128>)
             let packed = NativeMemory.AlignedAlloc(totalBytes, 16un) |> NativePtr.ofVoidPtr<HighwayUint128>
             if NativePtr.toNativeInt packed = 0n then
                 error <- "NativeMemory.AlignedAlloc returned null."
-                HighwaySortStatus.Internal
+                FsHighwaySortStatus.Internal
             else
                 try
                     HighwayNative.Pack(keys, values, packed, length)
                     let status = HighwayNative.TrySortPackedAscending(packed, length, &error)
-                    if status = HighwaySortStatus.Ok then HighwayNative.Unpack(values, packed, length)
+                    if status = FsHighwaySortStatus.Ok then HighwayNative.Unpack(values, packed, length)
                     status
                 finally
                     NativeMemory.AlignedFree(NativePtr.toVoidPtr packed)
@@ -163,19 +163,19 @@ type HighwayNative private () =
     static member TrySortKeysValuesDescending(keys: ReadOnlySpan<double>, values: Span<uint32>, error: byref<string>) =
         if keys.Length <> values.Length then
             error <- "Keys and values must have the same length."
-            HighwaySortStatus.InvalidLength
+            FsHighwaySortStatus.InvalidLength
         else
             let length = keys.Length
             let totalBytes = unativeint (length * sizeof<HighwayUint128>)
             let packed = NativeMemory.AlignedAlloc(totalBytes, 16un) |> NativePtr.ofVoidPtr<HighwayUint128>
             if NativePtr.toNativeInt packed = 0n then
                 error <- "NativeMemory.AlignedAlloc returned null."
-                HighwaySortStatus.Internal
+                FsHighwaySortStatus.Internal
             else
                 try
                     HighwayNative.Pack(keys, values, packed, length)
                     let status = HighwayNative.TrySortPackedDescending(packed, length, &error)
-                    if status = HighwaySortStatus.Ok then HighwayNative.Unpack(values, packed, length)
+                    if status = FsHighwaySortStatus.Ok then HighwayNative.Unpack(values, packed, length)
                     status
                 finally
                     NativeMemory.AlignedFree(NativePtr.toVoidPtr packed)
@@ -190,13 +190,8 @@ type HighwayNative private () =
             HighwayNative.PackScalar(keys, values, destination, length)
 
     static member private Unpack(values: Span<uint32>, source: HighwayUint128Ptr, length: int) =
-        if not simdDisabled then
-            if Avx512F.IsSupported then HighwayNative.UnpackAvx512(values, source, length)
-            elif Avx2.IsSupported then HighwayNative.UnpackAvx2(values, source, length)
-            elif AdvSimd.Arm64.IsSupported then HighwayNative.UnpackArm64(values, source, length)
-            else HighwayNative.UnpackScalar(values, source, length)
-        else
-            HighwayNative.UnpackScalar(values, source, length)
+        // Keep unpack simple and reliable in F#; the native sort dominates the benchmark.
+        HighwayNative.UnpackScalar(values, source, length)
 
     static member private PackScalar(keys: ReadOnlySpan<double>, values: ReadOnlySpan<uint32>, destination: HighwayUint128Ptr, length: int) =
         for i = 0 to length - 1 do
@@ -208,61 +203,6 @@ type HighwayNative private () =
     static member private UnpackScalar(values: Span<uint32>, source: HighwayUint128Ptr, length: int) =
         for i = 0 to length - 1 do
             values[i] <- uint32 ((NativePtr.get source i).Lo >>> 32)
-
-
-    static member private UnpackAvx512(values: Span<uint32>, source: HighwayUint128Ptr, length: int) =
-        let mutable i = 0
-        let loBuffer = Array.zeroCreate<uint64> 8
-        let shiftedBuffer = Array.zeroCreate<uint64> 8
-        while i <= length - 8 do
-            for lane = 0 to 7 do
-                loBuffer[lane] <- (NativePtr.get source (i + lane)).Lo
-            let loRef: byref<uint64> = &MemoryMarshal.GetArrayDataReference(loBuffer)
-            let loVec: Vector512<uint64> = Vector512.LoadUnsafe(&loRef)
-            let shifted: Vector512<uint64> = loVec >>> 32
-            let shiftedRef: byref<uint64> = &MemoryMarshal.GetArrayDataReference(shiftedBuffer)
-            shifted.StoreUnsafe(&shiftedRef)
-            for lane = 0 to 7 do
-                values[i + lane] <- uint32 shiftedBuffer[lane]
-            i <- i + 8
-        if i < length then
-            HighwayNative.UnpackScalar(values.Slice(i), NativePtr.add source i, length - i)
-
-    static member private UnpackAvx2(values: Span<uint32>, source: HighwayUint128Ptr, length: int) =
-        let mutable i = 0
-        let loBuffer = Array.zeroCreate<uint64> 4
-        let shiftedBuffer = Array.zeroCreate<uint64> 4
-        while i <= length - 4 do
-            for lane = 0 to 3 do
-                loBuffer[lane] <- (NativePtr.get source (i + lane)).Lo
-            let loRef: byref<uint64> = &MemoryMarshal.GetArrayDataReference(loBuffer)
-            let loVec: Vector256<uint64> = Vector256.LoadUnsafe(&loRef)
-            let shifted: Vector256<uint64> = loVec >>> 32
-            let shiftedRef: byref<uint64> = &MemoryMarshal.GetArrayDataReference(shiftedBuffer)
-            shifted.StoreUnsafe(&shiftedRef)
-            for lane = 0 to 3 do
-                values[i + lane] <- uint32 shiftedBuffer[lane]
-            i <- i + 4
-        if i < length then
-            HighwayNative.UnpackScalar(values.Slice(i), NativePtr.add source i, length - i)
-
-    static member private UnpackArm64(values: Span<uint32>, source: HighwayUint128Ptr, length: int) =
-        let mutable i = 0
-        let loBuffer = Array.zeroCreate<uint64> 2
-        let shiftedBuffer = Array.zeroCreate<uint64> 2
-        while i <= length - 2 do
-            for lane = 0 to 1 do
-                loBuffer[lane] <- (NativePtr.get source (i + lane)).Lo
-            let loRef: byref<uint64> = &MemoryMarshal.GetArrayDataReference(loBuffer)
-            let loVec: Vector128<uint64> = Vector128.LoadUnsafe(&loRef)
-            let shifted: Vector128<uint64> = loVec >>> 32
-            let shiftedRef: byref<uint64> = &MemoryMarshal.GetArrayDataReference(shiftedBuffer)
-            shifted.StoreUnsafe(&shiftedRef)
-            for lane = 0 to 1 do
-                values[i + lane] <- uint32 shiftedBuffer[lane]
-            i <- i + 2
-        if i < length then
-            HighwayNative.UnpackScalar(values.Slice(i), NativePtr.add source i, length - i)
 
     static member private PackAvx512(keys: ReadOnlySpan<double>, values: ReadOnlySpan<uint32>, destination: HighwayUint128Ptr, length: int) =
         let mutable i = 0

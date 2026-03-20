@@ -5,7 +5,7 @@
     <LangVersion>preview</LangVersion>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <IsPackable>true</IsPackable>
-    <PackageId>HighwaySort.Interop</PackageId>
+    <PackageId>FsFsHighwaySort.Interop</PackageId>
     <Version>0.1.0</Version>
     <Description>Managed .NET interop library for the Highway sort wrapper (F#).</Description>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
@@ -16,16 +16,16 @@
   </ItemGroup>
 
   <Choose>
-    <When Condition="Exists('..\HighwaySort.Native.Runtime\HighwaySort.Native.Runtime.csproj')">
+    <When Condition="Exists('..\FsFsFsHighwaySort.Native.Runtime\FsFsFsHighwaySort.Native.Runtime.csproj')">
       <ItemGroup>
-        <ProjectReference Include="..\HighwaySort.Native.Runtime\HighwaySort.Native.Runtime.csproj"
+        <ProjectReference Include="..\FsFsFsHighwaySort.Native.Runtime\FsFsFsHighwaySort.Native.Runtime.csproj"
                           ReferenceOutputAssembly="false"
                           PrivateAssets="all" />
       </ItemGroup>
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="HighwaySort.Native.Runtime" Version="0.1.0" />
+        <PackageReference Include="FsFsFsHighwaySort.Native.Runtime" Version="0.1.0" />
       </ItemGroup>
     </Otherwise>
   </Choose>

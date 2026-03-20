@@ -9,6 +9,6 @@
 
   <ItemGroup>
     <Compile Include="Program.fs" />
-    <ProjectReference Include="..\HighwaySort.Interop\HighwaySort.Interop.fsproj" />
+    <ProjectReference Include="..\FsFsHighwaySort.Interop\FsFsHighwaySort.Interop.fsproj" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,92 @@
+name: ci
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-native:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            rid: linux-x64
+            artifact_name: native-linux-x64
+            stage_command: bash ./eng/stage-native-linux.sh
+            upload_path: artifacts/nuget/native/runtimes/linux-x64/native
+          - os: windows-2022
+            rid: win-x64
+            artifact_name: native-win-x64
+            stage_command: pwsh ./eng/stage-native-windows.ps1
+            upload_path: artifacts/nuget/native/runtimes/win-x64/native
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Run native build and staging
+        shell: bash
+        run: ${{ matrix.stage_command }}
+
+      - name: Upload native runtime artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.upload_path }}
+          if-no-files-found: error
+
+  pack:
+    needs: build-native
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Download Linux native artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: native-linux-x64
+          path: artifacts/nuget/native/runtimes/linux-x64/native
+
+      - name: Download Windows native artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: native-win-x64
+          path: artifacts/nuget/native/runtimes/win-x64/native
+
+      - name: Restore
+        run: dotnet restore FsFsHighwaySort.sln
+
+      - name: Pack NuGets
+        run: bash ./eng/pack.sh
+
+      - name: Publish benchmark linux-x64
+        run: dotnet publish ./src/FsFsHighwaySort.Benchmark/FsFsHighwaySort.Benchmark.csproj -c Release -r linux-x64 --self-contained false -o ./artifacts/publish/benchmark-linux-x64
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages
+          path: artifacts/packages/*.nupkg
+          if-no-files-found: error
+
+      - name: Upload benchmark publish output
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-linux-x64
+          path: artifacts/publish/benchmark-linux-x64
+          if-no-files-found: error

@@ -1,19 +1,17 @@
-# Highway Sort Wrapper
+# FsHighwaySort
 
-High-performance native sorting for packed 128-bit key/value pairs using Google Highway VQSort, with a stable C ABI wrapper and a managed F# interop layer.
+High-performance native sorting for packed 128-bit key/value pairs using Google Highway VQSort, with a stable C ABI wrapper and an F# interop layer.
 
 This repository contains:
 
-- `src/HighwaySort.Native`  
+- `src/FsHighwaySort.Native`  
   Native C/C++ wrapper library around Highway.
-- `src/HighwaySort.Native.Runtime`  
+- `src/FsHighwaySort.Native.Runtime`  
   NuGet packaging project for native runtime assets.
-- `src/HighwaySort.Interop`  
+- `src/FsHighwaySort.Interop`  
   F# managed interop layer.
-- `src/HighwaySort.Benchmark`  
+- `src/FsHighwaySort.Benchmark`  
   F# console app / benchmark sample.
-- `.github/workflows`  
-  CI for Linux and Windows build + packing.
 
 ## Design
 
@@ -62,11 +60,11 @@ For command-line builds on Windows, use **Developer Command Prompt for Visual St
 From the repository root:
 
 ```bash
-cmake -S src/HighwaySort.Native -B artifacts/native/linux-x64 -DCMAKE_BUILD_TYPE=Release
+cmake -S src/FsHighwaySort.Native -B artifacts/native/linux-x64 -DCMAKE_BUILD_TYPE=Release
 cmake --build artifacts/native/linux-x64 --config Release
 cmake --install artifacts/native/linux-x64 --config Release --prefix artifacts/stage/linux-x64
-dotnet build src/HighwaySort.Interop/HighwaySort.Interop.fsproj -c Release
-dotnet build src/HighwaySort.Benchmark/HighwaySort.Benchmark.fsproj -c Release
+dotnet build src/FsHighwaySort.Interop/FsHighwaySort.Interop.fsproj -c Release
+dotnet build src/FsHighwaySort.Benchmark/FsHighwaySort.Benchmark.fsproj -c Release
 ```
 
 ## Build on Windows from the command line
@@ -76,11 +74,11 @@ Open **Developer Command Prompt for Visual Studio 2026**.
 From the repository root:
 
 ```bat
-cmake -S src\HighwaySort.Native -B artifacts\native\win-x64 -G "Visual Studio 18 2026" -A x64
+cmake -S src\FsHighwaySort.Native -B artifacts\native\win-x64 -G "Visual Studio 18 2026" -A x64
 cmake --build artifacts\native\win-x64 --config Release
 cmake --install artifacts\native\win-x64 --config Release --prefix artifacts\stage\win-x64
-dotnet build src\HighwaySort.Interop\HighwaySort.Interop.fsproj -c Release
-dotnet build src\HighwaySort.Benchmark\HighwaySort.Benchmark.fsproj -c Release
+dotnet build src\FsHighwaySort.Interop\FsHighwaySort.Interop.fsproj -c Release
+dotnet build src\FsHighwaySort.Benchmark\FsHighwaySort.Benchmark.fsproj -c Release
 ```
 
 ### Windows notes
@@ -91,18 +89,6 @@ dotnet build src\HighwaySort.Benchmark\HighwaySort.Benchmark.fsproj -c Release
 - The Linux native binary is typically:
   - `artifacts/stage/linux-x64/libhighway_sort_wrapper.so`
 
-## Build with Ninja on Windows
-
-If you prefer Ninja instead of the Visual Studio generator:
-
-```bat
-cmake -S src\HighwaySort.Native -B artifacts\native\win-x64-ninja -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build artifacts\native\win-x64-ninja
-cmake --install artifacts\native\win-x64-ninja --prefix artifacts\stage\win-x64
-```
-
-Use the Developer Command Prompt / Developer PowerShell here as well.
-
 ## Pack the native runtime NuGet
 
 The native runtime package expects staged binaries under:
@@ -110,43 +96,28 @@ The native runtime package expects staged binaries under:
 - `artifacts/nuget/native/runtimes/linux-x64/native/...`
 - `artifacts/nuget/native/runtimes/win-x64/native/...`
 
-Example layout:
-
-```text
-artifacts/
-  nuget/
-    native/
-      runtimes/
-        linux-x64/
-          native/
-            libhighway_sort_wrapper.so
-        win-x64/
-          native/
-            highway_sort_wrapper.dll
-```
-
 Then pack:
 
 ```bash
-dotnet pack src/HighwaySort.Native.Runtime/HighwaySort.Native.Runtime.csproj -c Release
+dotnet pack src/FsHighwaySort.Native.Runtime/FsHighwaySort.Native.Runtime.csproj -c Release
 ```
 
 On Windows:
 
 ```bat
-dotnet pack src\HighwaySort.Native.Runtime\HighwaySort.Native.Runtime.csproj -c Release
+dotnet pack src\FsHighwaySort.Native.Runtime\FsHighwaySort.Native.Runtime.csproj -c Release
 ```
 
 ## Pack the managed interop NuGet
 
 ```bash
-dotnet pack src/HighwaySort.Interop/HighwaySort.Interop.fsproj -c Release
+dotnet pack src/FsHighwaySort.Interop/FsHighwaySort.Interop.fsproj -c Release
 ```
 
 On Windows:
 
 ```bat
-dotnet pack src\HighwaySort.Interop\HighwaySort.Interop.fsproj -c Release
+dotnet pack src\FsHighwaySort.Interop\FsHighwaySort.Interop.fsproj -c Release
 ```
 
 ## Run the benchmark
@@ -154,13 +125,13 @@ dotnet pack src\HighwaySort.Interop\HighwaySort.Interop.fsproj -c Release
 Linux:
 
 ```bash
-dotnet run --project src/HighwaySort.Benchmark/HighwaySort.Benchmark.fsproj -c Release
+dotnet run --project src/FsHighwaySort.Benchmark/FsHighwaySort.Benchmark.fsproj -c Release
 ```
 
 Windows:
 
 ```bat
-dotnet run --project src\HighwaySort.Benchmark\HighwaySort.Benchmark.fsproj -c Release
+dotnet run --project src\FsHighwaySort.Benchmark\FsHighwaySort.Benchmark.fsproj -c Release
 ```
 
 ## SIMD control
@@ -172,34 +143,24 @@ To disable managed SIMD explicitly:
 ### Linux
 
 ```bash
-HIGHWAYBENCHMARK_SIMD_DISABLE=true dotnet run --project src/HighwaySort.Benchmark/HighwaySort.Benchmark.fsproj -c Release
+HIGHWAYBENCHMARK_SIMD_DISABLE=true dotnet run --project src/FsHighwaySort.Benchmark/FsHighwaySort.Benchmark.fsproj -c Release
 ```
 
 ### Windows Command Prompt
 
 ```bat
 set HIGHWAYBENCHMARK_SIMD_DISABLE=true
-dotnet run --project src\HighwaySort.Benchmark\HighwaySort.Benchmark.fsproj -c Release
+dotnet run --project src\FsHighwaySort.Benchmark\FsHighwaySort.Benchmark.fsproj -c Release
 ```
 
 ### Windows PowerShell
 
 ```powershell
 $env:HIGHWAYBENCHMARK_SIMD_DISABLE = "true"
-dotnet run --project src/HighwaySort.Benchmark/HighwaySort.Benchmark.fsproj -c Release
+dotnet run --project src/FsHighwaySort.Benchmark/FsHighwaySort.Benchmark.fsproj -c Release
 ```
 
 ## Troubleshooting
-
-### CMake deprecation warnings
-
-This repo uses:
-
-```cmake
-cmake_minimum_required(VERSION 3.20...3.31)
-```
-
-to avoid old compatibility-mode warnings in newer CMake versions.
 
 ### `NU5017: Cannot create a package that has no dependencies nor content`
 
@@ -212,20 +173,8 @@ Build and stage native assets first.
 
 ### Windows DLL export problems
 
-The wrapper uses explicit export/import macros in `highway_sort_wrapper.h` and defines `HIGHWAY_SORT_WRAPPER_BUILD=1` for the native target. This is required for reliable Windows DLL exports.
+The wrapper uses explicit export/import macros in `highway_sort_wrapper.h` and defines `HIGHWAY_SORT_WRAPPER_BUILD=1` for the native target.
 
 ### Alignment errors
 
 The native wrapper requires the incoming buffer to be 16-byte aligned. The managed code uses aligned unmanaged allocation and should not pass regular managed arrays directly.
-
-## F# note
-
-The managed interop and benchmark projects in this bundle are written in F#. Because F# cannot directly author `LibraryImport` source-generated partial methods the same way C# can, the F# interop layer uses `DllImport` against the same stable C wrapper ABI.
-
-## CI
-
-The GitHub Actions workflow builds native assets on Linux and Windows, stages them under `runtimes/{rid}/native`, and packs:
-
-- native runtime NuGet
-- managed interop NuGet
-
