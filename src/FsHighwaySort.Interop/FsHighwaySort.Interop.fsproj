@@ -16,16 +16,16 @@
   </ItemGroup>
 
   <Choose>
-    <When Condition="Exists('..\FsFsFsHighwaySort.Native.Runtime\FsFsFsHighwaySort.Native.Runtime.csproj')">
+    <When Condition="Exists('..\FsHighwaySort.Native.Runtime\FsHighwaySort.Native.Runtime.csproj')">
       <ItemGroup>
-        <ProjectReference Include="..\FsFsFsHighwaySort.Native.Runtime\FsFsFsHighwaySort.Native.Runtime.csproj"
+        <ProjectReference Include="..\FsHighwaySort.Native.Runtime\FsHighwaySort.Native.Runtime.csproj"
                           ReferenceOutputAssembly="false"
                           PrivateAssets="all" />
       </ItemGroup>
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="FsFsFsHighwaySort.Native.Runtime" Version="0.1.0" />
+        <PackageReference Include="FsHighwaySort.Native.Runtime" Version="0.1.0" />
       </ItemGroup>
     </Otherwise>
   </Choose>
