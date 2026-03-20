@@ -44,6 +44,7 @@ The managed side allocates aligned unmanaged memory and packs:
 - .NET SDK
 - Git
 - Internet access during configure if `HIGHWAY_SORT_FETCH_HIGHWAY=ON`
+- Highway shared library and dev package e.g.: libhwy-dev on Ubuntu 24.04 if `HIGHWAY_SORT_FETCH_HIGHWAY=OFF`
 
 ### Windows
 
