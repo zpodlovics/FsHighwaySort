@@ -1,4 +1,4 @@
-namespace FsFsHighwaySort.Interop
+namespace FsHighwaySort.Interop
 
 open System
 open System.Runtime.CompilerServices

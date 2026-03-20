@@ -1,6 +1,6 @@
 open System
 open System.Diagnostics
-open FsFsHighwaySort.Interop
+open FsHighwaySort.Interop
 
 [<EntryPoint>]
 let main _ =
